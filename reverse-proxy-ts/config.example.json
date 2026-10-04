@@ -1,0 +1,17 @@
+{
+  "listenAddr": ":3000",
+  "routes": [
+    {
+      "match": { "pathPrefix": "/api" },
+      "upstream": "http://127.0.0.1:4001",
+      "stripPrefix": true,
+      "addRequestHeaders": { "X-Forwarded-By": "reverse-proxy-ts" },
+      "healthCheck": { "path": "/health", "intervalMs": 10000 }
+    },
+    {
+      "match": { "host": "static.local" },
+      "upstream": "http://127.0.0.1:4002",
+      "addResponseHeaders": { "Cache-Control": "public, max-age=60" }
+    }
+  ]
+}

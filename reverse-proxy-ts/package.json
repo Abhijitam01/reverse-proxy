@@ -1,0 +1,23 @@
+{
+  "name": "reverse-proxy-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "HTTP reverse proxy with host and path routing, header rewriting, and upstream health checks",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/bin/server.js",
+    "dev": "tsx src/bin/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  }
+}

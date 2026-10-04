@@ -1,0 +1,40 @@
+{
+  "listenAddr": ":8080",
+  "routes": [
+    {
+      "match": {
+        "pathPrefix": "/api"
+      },
+      "upstream": "http://localhost:3000",
+      "stripPrefix": true,
+      "addRequestHeaders": {
+        "X-Forwarded-By": "reverse-proxy-go"
+      },
+      "healthCheck": {
+        "path": "/health",
+        "intervalMs": 10000
+      }
+    },
+    {
+      "match": {
+        "host": "api.example.com"
+      },
+      "upstream": "http://api-server:3000",
+      "stripPrefix": false,
+      "addRequestHeaders": {
+        "X-Forwarded-Host": "api.example.com"
+      },
+      "removeResponseHeaders": ["X-Internal-Version"]
+    },
+    {
+      "match": {
+        "pathPrefix": "/static"
+      },
+      "upstream": "http://cdn:8000",
+      "stripPrefix": true,
+      "addResponseHeaders": {
+        "Cache-Control": "public, max-age=31536000"
+      }
+    }
+  ]
+}
