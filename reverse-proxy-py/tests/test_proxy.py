@@ -9,7 +9,6 @@ from fastapi import FastAPI
 import uvicorn
 from src.server import build_proxy
 
-# helper to create upstream server that echoes headers
 def create_upstream_app():
     from fastapi import FastAPI, Request
     from fastapi.responses import JSONResponse
@@ -17,7 +16,6 @@ def create_upstream_app():
     @app.api_route("/{path:path}", methods=["GET","POST","PUT","DELETE","PATCH","OPTIONS","HEAD"])
     async def echo(request: Request, path: str):
         headers = dict(request.headers)
-        # collect x-received
         resp_headers = {}
         data = {"path": request.url.path}
         for k, v in headers.items():
@@ -43,7 +41,6 @@ async def upstream():
     server = uvicorn.Server(config)
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
-    # wait for startup
     for _ in range(30):
         try:
             import httpx
@@ -164,7 +161,6 @@ async def test_health_endpoint(upstream):
 
 @pytest.mark.asyncio
 async def test_forward_5xx(upstream):
-    # create error upstream
     from fastapi import FastAPI
     from fastapi.responses import JSONResponse
     err_app = FastAPI()

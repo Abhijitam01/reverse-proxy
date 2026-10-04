@@ -1,5 +1,3 @@
-"""FastAPI reverse proxy factory."""
-
 from __future__ import annotations
 
 import urllib.parse
@@ -36,7 +34,6 @@ def _apply_mods(headers: dict, add: dict | None, remove: list[str] | None) -> di
 
 
 def build_app(config: dict, health_checker: HealthChecker | None = None) -> FastAPI:
-    """Compatibility wrapper matching TS buildProxy(config). Returns FastAPI app."""
     result = build_proxy(config)
     return result["app"]
 
@@ -49,7 +46,6 @@ def build_proxy(config: dict, options: dict | None = None):
 
     app = FastAPI(title="reverse-proxy-py")
 
-    # management endpoints must be defined before catch-all
     @app.get("/_proxy/routes")
     async def list_routes():
         infos = []
@@ -89,21 +85,15 @@ def build_proxy(config: dict, options: dict | None = None):
 
     @app.api_route("/{full_path:path}", methods=["GET","POST","PUT","DELETE","PATCH","OPTIONS","HEAD"])
     async def proxy_handler(full_path: str, request: Request):
-        # reconstruct host and path
         host = request.headers.get("host")
-        # request.url.path includes leading /
         path = request.url.path
-        # match route
         matched = match_route(current_routes, host, path)
         if not matched:
             return JSONResponse(status_code=404, content={"success": False, "error": "No matching route found"})
         route, matched_prefix = matched
-        # health check
         if not health_checker.is_healthy(route["upstream"]):
             return JSONResponse(status_code=502, content={"success": False, "error": "Upstream server is unhealthy"})
-        # construct forward path
         original_url = str(request.url)
-        # we need path + query
         parsed_req = urllib.parse.urlparse(original_url)
         path_only = parsed_req.path
         query = parsed_req.query
@@ -113,16 +103,12 @@ def build_proxy(config: dict, options: dict | None = None):
             final_path = path_only
         if query:
             final_path = f"{final_path}?{query}"
-        # headers
         forward_headers = _copy_headers(dict(request.headers))
         forward_headers = _apply_mods(forward_headers, route.get("addRequestHeaders"), route.get("removeRequestHeaders"))
-        # host header for upstream
         upstream_parsed = urllib.parse.urlparse(route["upstream"])
         forward_headers["host"] = upstream_parsed.netloc
-        # body
         body = await request.body()
         upstream_url = urllib.parse.urljoin(route["upstream"].rstrip("/") + "/", final_path.lstrip("/")) if not final_path.startswith("/") else urllib.parse.urljoin(route["upstream"], final_path)
-        # alternative: use urljoin correctly
         if final_path.startswith("/"):
             upstream_url = route["upstream"].rstrip("/") + final_path
         else:
@@ -141,25 +127,17 @@ def build_proxy(config: dict, options: dict | None = None):
         except Exception as e:
             return JSONResponse(status_code=502, content={"success": False, "error": "Bad Gateway", "message": "Failed to reach upstream server", "details": str(e)})
 
-        # copy response headers
         resp_headers = _copy_headers(dict(upstream_resp.headers))
         resp_headers = _apply_mods(resp_headers, route.get("addResponseHeaders"), route.get("removeResponseHeaders"))
-        # build response without auto media_type to respect header removal
-        # Starlette Response with media_type would re-add content-type even if removed, so handle explicitly
         if "content-type" not in resp_headers:
-            # return raw Response without media_type to avoid auto-adding content-type
             from starlette.responses import Response as StarletteResponse
 
-            # Use raw_headers to bypass charset logic
             resp = StarletteResponse(content=upstream_resp.content, status_code=upstream_resp.status_code, headers=resp_headers)
-            # remove auto-added content-type if present
             if "content-type" in resp.headers:
-                # starlette adds default; ensure removal by deleting from raw headers
                 del resp.headers["content-type"]
             return resp
         return Response(content=upstream_resp.content, status_code=upstream_resp.status_code, headers=resp_headers, media_type=resp_headers.get("content-type"))
 
-    # expose for tests
     app.state.health_checker = health_checker
     app.state.get_routes = lambda: list(current_routes)
 

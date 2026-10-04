@@ -1,19 +1,14 @@
-"""Request routing logic."""
-
 from __future__ import annotations
 
 from .types import RouteConfig
 
 
 def match_route(routes: list[RouteConfig], host: str | None, path: str):
-    """Find first matching route. Returns (route, matchedPrefix) or None."""
     for route in routes:
         match = route.get("match", {})
-        # host check
         if "host" in match and match["host"]:
             if not host or not host_matches(host, match["host"]):
                 continue
-        # pathPrefix check
         if "pathPrefix" in match and match["pathPrefix"]:
             if not path_matches(path, match["pathPrefix"]):
                 continue
@@ -28,7 +23,7 @@ def host_matches(actual: str, pattern: str) -> bool:
     if pattern == actual_host:
         return True
     if pattern.startswith("*."):
-        suffix = pattern[1:]  # ".example.com"
+        suffix = pattern[1:]
         return actual_host.endswith(suffix)
     return False
 

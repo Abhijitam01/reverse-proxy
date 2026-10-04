@@ -13,7 +13,6 @@ export interface RequestTarget {
   search: string;
 }
 
-/** Split an origin-form request target. The path is forwarded unchanged. */
 export function splitRequestTarget(url: string | undefined): RequestTarget | undefined {
   if (!url || !url.startsWith("/")) return undefined;
   const queryAt = url.indexOf("?");
@@ -31,11 +30,6 @@ export function upstreamUrl(route: RouteConfig, target: RequestTarget): URL {
   return url;
 }
 
-/**
- * Stream the client request to the upstream and the upstream response back.
- * Connection failures are 502. A timeout with no response yet is 504.
- * Upstream status codes, including 5xx, are passed through.
- */
 export function forwardRequest(
   req: IncomingMessage,
   res: ServerResponse,

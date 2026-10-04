@@ -105,7 +105,6 @@ export interface ListenAddress {
   port: number;
 }
 
-/** Parse Go-style addresses (`:3000`) and `host:port`, including bracketed IPv6. */
 export function parseListenAddr(addr: string): ListenAddress {
   let host = "0.0.0.0";
   let portText = addr;

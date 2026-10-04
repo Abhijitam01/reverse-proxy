@@ -9,7 +9,6 @@ import (
 	"reverse-proxy-go/internal/health"
 )
 
-// TestRouteMatching tests route matching logic.
 func TestRouteMatching(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -34,7 +33,6 @@ func TestRouteMatching(t *testing.T) {
 	}
 }
 
-// TestRouteMatchingHost tests host-based route matching.
 func TestRouteMatchingHost(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -57,7 +55,6 @@ func TestRouteMatchingHost(t *testing.T) {
 	}
 }
 
-// TestRouteNoMatch tests when no route matches.
 func TestRouteNoMatch(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -79,7 +76,6 @@ func TestRouteNoMatch(t *testing.T) {
 	}
 }
 
-// TestAddRoute tests adding routes.
 func TestAddRoute(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -97,7 +93,6 @@ func TestAddRoute(t *testing.T) {
 	}
 }
 
-// TestRemoveRoute tests removing routes.
 func TestRemoveRoute(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -117,7 +112,6 @@ func TestRemoveRoute(t *testing.T) {
 	}
 }
 
-// TestPrefixStripping tests Director with prefix stripping.
 func TestPrefixStripping(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -140,7 +134,6 @@ func TestPrefixStripping(t *testing.T) {
 	}
 }
 
-// TestPrefixStrippingWithoutStripPrefix tests Director without stripping.
 func TestPrefixStrippingWithoutStripPrefix(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -163,7 +156,6 @@ func TestPrefixStrippingWithoutStripPrefix(t *testing.T) {
 	}
 }
 
-// TestDirectorSetsUpstreamURL tests that Director sets upstream URL.
 func TestDirectorSetsUpstreamURL(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -188,7 +180,6 @@ func TestDirectorSetsUpstreamURL(t *testing.T) {
 	}
 }
 
-// TestDirectorAddRequestHeaders tests adding request headers.
 func TestDirectorAddRequestHeaders(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -213,7 +204,6 @@ func TestDirectorAddRequestHeaders(t *testing.T) {
 	}
 }
 
-// TestDirectorRemoveRequestHeaders tests removing request headers.
 func TestDirectorRemoveRequestHeaders(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -221,8 +211,8 @@ func TestDirectorRemoveRequestHeaders(t *testing.T) {
 	r := NewRouter(hc)
 
 	route := config.RouteConfig{
-		Upstream: "http://localhost:3000",
-		Match:    config.MatchConfig{PathPrefix: "/"},
+		Upstream:             "http://localhost:3000",
+		Match:                config.MatchConfig{PathPrefix: "/"},
 		RemoveRequestHeaders: []string{"X-Remove"},
 	}
 
@@ -237,7 +227,6 @@ func TestDirectorRemoveRequestHeaders(t *testing.T) {
 	}
 }
 
-// TestModifyResponseAddHeaders tests adding response headers.
 func TestModifyResponseAddHeaders(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -265,7 +254,6 @@ func TestModifyResponseAddHeaders(t *testing.T) {
 	}
 }
 
-// TestModifyResponseRemoveHeaders tests removing response headers.
 func TestModifyResponseRemoveHeaders(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -273,8 +261,8 @@ func TestModifyResponseRemoveHeaders(t *testing.T) {
 	r := NewRouter(hc)
 
 	route := config.RouteConfig{
-		Upstream: "http://localhost:3000",
-		Match:    config.MatchConfig{PathPrefix: "/"},
+		Upstream:              "http://localhost:3000",
+		Match:                 config.MatchConfig{PathPrefix: "/"},
 		RemoveResponseHeaders: []string{"X-Remove"},
 	}
 
@@ -292,7 +280,6 @@ func TestModifyResponseRemoveHeaders(t *testing.T) {
 	}
 }
 
-// TestSetRoutes tests setting multiple routes.
 func TestSetRoutes(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()

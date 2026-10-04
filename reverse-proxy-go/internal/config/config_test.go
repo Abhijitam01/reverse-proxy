@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-// TestLoadValidConfig tests loading a valid configuration.
 func TestLoadValidConfig(t *testing.T) {
 	configData := `{
 		"listenAddr": ":9090",
@@ -39,7 +38,6 @@ func TestLoadValidConfig(t *testing.T) {
 	}
 }
 
-// TestLoadConfigMissingFile tests error when config file doesn't exist.
 func TestLoadConfigMissingFile(t *testing.T) {
 	_, err := LoadConfig("/nonexistent/config.json")
 	if err == nil {
@@ -47,7 +45,6 @@ func TestLoadConfigMissingFile(t *testing.T) {
 	}
 }
 
-// TestLoadConfigInvalidJSON tests error on invalid JSON.
 func TestLoadConfigInvalidJSON(t *testing.T) {
 	tmpFile := createTempConfigFile(t, `{ invalid json }`)
 	defer os.Remove(tmpFile)
@@ -58,7 +55,6 @@ func TestLoadConfigInvalidJSON(t *testing.T) {
 	}
 }
 
-// TestLoadConfigMissingUpstream tests validation error.
 func TestLoadConfigMissingUpstream(t *testing.T) {
 	configData := `{
 		"listenAddr": ":8080",
@@ -78,7 +74,6 @@ func TestLoadConfigMissingUpstream(t *testing.T) {
 	}
 }
 
-// TestLoadConfigMissingMatch tests validation error.
 func TestLoadConfigMissingMatch(t *testing.T) {
 	configData := `{
 		"listenAddr": ":8080",
@@ -98,7 +93,6 @@ func TestLoadConfigMissingMatch(t *testing.T) {
 	}
 }
 
-// TestLoadConfigDefaultListenAddr tests default listen address.
 func TestLoadConfigDefaultListenAddr(t *testing.T) {
 	configData := `{
 		"routes": [
@@ -122,7 +116,6 @@ func TestLoadConfigDefaultListenAddr(t *testing.T) {
 	}
 }
 
-// TestLoadConfigNoRoutes tests error when no routes configured.
 func TestLoadConfigNoRoutes(t *testing.T) {
 	configData := `{
 		"listenAddr": ":8080",
@@ -138,7 +131,6 @@ func TestLoadConfigNoRoutes(t *testing.T) {
 	}
 }
 
-// TestDefaultConfig tests the default configuration.
 func TestDefaultConfig(t *testing.T) {
 	config := DefaultConfig()
 
@@ -151,7 +143,6 @@ func TestDefaultConfig(t *testing.T) {
 	}
 }
 
-// createTempConfigFile creates a temporary config file for testing.
 func createTempConfigFile(t *testing.T, content string) string {
 	tmpFile, err := os.CreateTemp("", "config*.json")
 	if err != nil {

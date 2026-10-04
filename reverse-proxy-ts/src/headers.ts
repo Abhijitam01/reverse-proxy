@@ -1,9 +1,5 @@
 import type { IncomingHttpHeaders, OutgoingHttpHeaders } from "node:http";
 
-/**
- * Hop-by-hop headers (RFC 7230 §6.1). `content-length` is end-to-end and is
- * forwarded so request and response bodies keep their framing.
- */
 const HOP_BY_HOP = new Set([
   "connection",
   "keep-alive",
@@ -19,11 +15,6 @@ export function isHopByHop(name: string): boolean {
   return HOP_BY_HOP.has(name.toLowerCase());
 }
 
-/**
- * Copy end-to-end headers, drop hop-by-hop names (including those listed in
- * `Connection`), apply removals, then apply additions. A name that is both
- * added and removed stays removed.
- */
 export function rewriteHeaders(
   source: IncomingHttpHeaders,
   remove: readonly string[] | undefined,

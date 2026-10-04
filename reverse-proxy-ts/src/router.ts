@@ -1,11 +1,6 @@
 import type { HealthChecker } from "./health.js";
 import type { RouteConfig } from "./types.js";
 
-/**
- * First match wins. A route matches when every condition it sets is true.
- * `pathPrefix` is a raw prefix: `/api` also matches `/apiv2`. Put longer
- * prefixes first when routes overlap.
- */
 export function matchRoute(
   routes: readonly RouteConfig[],
   host: string | undefined,
@@ -23,16 +18,11 @@ export function routeMatches(route: RouteConfig, host: string | undefined, path:
   return true;
 }
 
-/**
- * Host comparison is case-insensitive. A pattern without a port matches the
- * hostname only, so `app.local` matches `app.local:3000`.
- */
 export function hostMatches(actual: string | undefined, expected: string): boolean {
   if (!actual) return false;
   const left = actual.toLowerCase();
   const right = expected.toLowerCase();
   if (left === right) return true;
-  // `app.local` matches `app.local:3000`. A pattern that includes a port must match exactly.
   return stripPort(left) === right;
 }
 

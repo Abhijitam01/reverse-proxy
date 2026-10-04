@@ -8,21 +8,18 @@ import (
 	"time"
 )
 
-// TestRegisterUpstream tests registering an upstream for health checks.
 func TestRegisterUpstream(t *testing.T) {
 	hc := NewHealthChecker()
 	defer hc.Close()
 
 	hc.RegisterUpstream("http://localhost:3000", "/health", 100)
 
-	// Health status should be available
 	status := hc.IsHealthy("http://localhost:3000")
 	if !status {
 		t.Fatalf("expected newly registered upstream to be healthy")
 	}
 }
 
-// TestHealthCheck tests health checking an active upstream.
 func TestHealthCheck(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -34,7 +31,6 @@ func TestHealthCheck(t *testing.T) {
 
 	hc.RegisterUpstream(server.URL, "/health", 50)
 
-	// Wait for health check to run
 	time.Sleep(100 * time.Millisecond)
 
 	if !hc.IsHealthy(server.URL) {
@@ -42,15 +38,12 @@ func TestHealthCheck(t *testing.T) {
 	}
 }
 
-// TestUnhealthyUpstream tests health checking a failing upstream.
 func TestUnhealthyUpstream(t *testing.T) {
 	hc := NewHealthChecker()
 	defer hc.Close()
 
-	// Register non-existent upstream
 	hc.RegisterUpstream("http://localhost:9999", "/health", 50)
 
-	// Wait for health check to determine unhealthy
 	time.Sleep(150 * time.Millisecond)
 
 	if hc.IsHealthy("http://localhost:9999") {
@@ -58,7 +51,6 @@ func TestUnhealthyUpstream(t *testing.T) {
 	}
 }
 
-// TestHealthCheckStatusCodes tests various HTTP status codes.
 func TestHealthCheckStatusCodes(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -88,7 +80,6 @@ func TestHealthCheckStatusCodes(t *testing.T) {
 
 			hc.RegisterUpstream(server.URL, "/health", 50)
 
-			// Wait for health check
 			time.Sleep(100 * time.Millisecond)
 
 			if hc.IsHealthy(server.URL) != test.expected {
@@ -98,7 +89,6 @@ func TestHealthCheckStatusCodes(t *testing.T) {
 	}
 }
 
-// TestUnregisterUpstream tests unregistering an upstream.
 func TestUnregisterUpstream(t *testing.T) {
 	hc := NewHealthChecker()
 	defer hc.Close()
@@ -112,7 +102,6 @@ func TestUnregisterUpstream(t *testing.T) {
 	}
 }
 
-// TestGetStatus tests getting all upstream statuses.
 func TestGetStatus(t *testing.T) {
 	server1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -130,7 +119,6 @@ func TestGetStatus(t *testing.T) {
 	hc.RegisterUpstream(server1.URL, "/health", 50)
 	hc.RegisterUpstream(server2.URL, "/health", 50)
 
-	// Wait for health checks
 	time.Sleep(150 * time.Millisecond)
 
 	status := hc.GetStatus()
@@ -147,18 +135,15 @@ func TestGetStatus(t *testing.T) {
 	}
 }
 
-// TestIsHealthyUnregistered tests IsHealthy for unregistered upstream.
 func TestIsHealthyUnregistered(t *testing.T) {
 	hc := NewHealthChecker()
 	defer hc.Close()
 
-	// Unregistered upstream should be considered healthy
 	if !hc.IsHealthy("http://localhost:9999") {
 		t.Fatalf("expected unregistered upstream to default to healthy")
 	}
 }
 
-// TestHealthCheckInterval tests that health checks run at configured interval.
 func TestHealthCheckInterval(t *testing.T) {
 	var checkCount int
 	var mu sync.Mutex
@@ -174,10 +159,8 @@ func TestHealthCheckInterval(t *testing.T) {
 	hc := NewHealthChecker()
 	defer hc.Close()
 
-	// Register with 50ms interval
 	hc.RegisterUpstream(server.URL, "/health", 50)
 
-	// Wait for several checks
 	time.Sleep(200 * time.Millisecond)
 
 	mu.Lock()
@@ -189,7 +172,6 @@ func TestHealthCheckInterval(t *testing.T) {
 	}
 }
 
-// TestMultipleRegistrations tests registering same upstream multiple times.
 func TestMultipleRegistrations(t *testing.T) {
 	hc := NewHealthChecker()
 	defer hc.Close()
@@ -203,7 +185,6 @@ func TestMultipleRegistrations(t *testing.T) {
 	}
 }
 
-// TestConcurrentIsHealthy tests concurrent reads of health status.
 func TestConcurrentIsHealthy(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -215,7 +196,6 @@ func TestConcurrentIsHealthy(t *testing.T) {
 
 	hc.RegisterUpstream(server.URL, "/health", 100)
 
-	// Spawn multiple goroutines reading health status concurrently
 	done := make(chan bool, 10)
 	for i := 0; i < 10; i++ {
 		go func() {
@@ -229,7 +209,6 @@ func TestConcurrentIsHealthy(t *testing.T) {
 	}
 }
 
-// TestClose tests closing the health checker.
 func TestClose(t *testing.T) {
 	hc := NewHealthChecker()
 

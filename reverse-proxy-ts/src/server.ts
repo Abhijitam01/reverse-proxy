@@ -17,7 +17,6 @@ export interface ProxyServer {
 }
 
 export interface ProxyOptions {
-  /** Upstream response deadline. Defaults to 30 seconds. */
   upstreamTimeoutMs?: number;
 }
 

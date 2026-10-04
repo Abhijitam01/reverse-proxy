@@ -1,5 +1,3 @@
-"""Request forwarding via httpx."""
-
 from __future__ import annotations
 
 import urllib.parse
@@ -34,6 +32,4 @@ def apply_header_mods(headers: dict, add: dict | None, remove: list[str] | None)
 
 
 async def forward_request(scope, receive, send, route: dict, forward_path: str):
-    """Forward ASGI request to upstream using httpx. Returns status code and response handling via send."""
-    # This is used via FastAPI endpoint impl instead; placeholder for direct ASGI forwarding
     pass

@@ -1,5 +1,3 @@
-"""Health checking for upstream servers."""
-
 from __future__ import annotations
 
 import asyncio
@@ -38,7 +36,6 @@ class HealthChecker:
         try:
             url = urllib.parse.urljoin(upstream, health_path)
             parsed = urllib.parse.urlparse(url)
-            # use asyncio to run blocking http in thread
             def _fetch():
                 try:
                     conn_cls = http.client.HTTPSConnection if parsed.scheme == "https" else http.client.HTTPConnection
@@ -76,7 +73,6 @@ class HealthChecker:
             loop_task = asyncio.create_task(loop())
             self._tasks[upstream] = loop_task
         except RuntimeError:
-            # no running loop yet, will start later - store config
             pass
 
     async def _perform_check(self, route: dict) -> None:
@@ -89,7 +85,6 @@ class HealthChecker:
             cur = self._health.get(upstream, {"url": upstream, "healthy": True})
             cur["healthy"] = healthy
             cur["lastCheck"] = int(asyncio.get_event_loop().time() * 1000) if asyncio.get_event_loop().is_running() else 0
-            # need real time
             import time
             cur["lastCheck"] = int(time.time() * 1000)
             cur.pop("error", None)

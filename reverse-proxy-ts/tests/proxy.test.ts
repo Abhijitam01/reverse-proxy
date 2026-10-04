@@ -133,9 +133,7 @@ describe("reverse proxy", () => {
   });
 
   it("returns 504 when the upstream does not respond in time", async () => {
-    const hanging = http.createServer(() => {
-      // Leave the socket open until the proxy deadline fires.
-    });
+    const hanging = http.createServer(() => {});
     const port = await listen(hanging);
     stop.push(() => closeServer(hanging));
 

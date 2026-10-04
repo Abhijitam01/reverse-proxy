@@ -14,23 +14,19 @@ import (
 	"reverse-proxy-go/internal/router"
 )
 
-// TestProxyBasicForwarding tests basic request forwarding.
 func TestProxyBasicForwarding(t *testing.T) {
-	// Create upstream server
 	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("upstream response"))
 	}))
 	defer upstreamServer.Close()
 
-	// Create handler
 	hc := health.NewHealthChecker()
 	defer hc.Close()
 
 	r := router.NewRouter(hc)
 	h := NewHandler(r, hc)
 
-	// Add route
 	r.AddRoute(config.RouteConfig{
 		Match: config.MatchConfig{
 			PathPrefix: "/api",
@@ -39,7 +35,6 @@ func TestProxyBasicForwarding(t *testing.T) {
 		StripPrefix: true,
 	})
 
-	// Make request
 	req := httptest.NewRequest("GET", "/api/test", nil)
 	w := httptest.NewRecorder()
 
@@ -55,7 +50,6 @@ func TestProxyBasicForwarding(t *testing.T) {
 	}
 }
 
-// TestProxyPrefixStripping tests prefix stripping functionality.
 func TestProxyPrefixStripping(t *testing.T) {
 	var capturedPath string
 	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +82,6 @@ func TestProxyPrefixStripping(t *testing.T) {
 	}
 }
 
-// TestProxyHostMatching tests host-based routing.
 func TestProxyHostMatching(t *testing.T) {
 	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -109,7 +102,6 @@ func TestProxyHostMatching(t *testing.T) {
 		Upstream: upstreamServer.URL,
 	})
 
-	// Request with matching host
 	req := httptest.NewRequest("GET", "http://api.example.com/test", nil)
 	req.Host = "api.example.com"
 	w := httptest.NewRecorder()
@@ -121,7 +113,6 @@ func TestProxyHostMatching(t *testing.T) {
 	}
 }
 
-// TestProxyNoMatch tests 404 when no route matches.
 func TestProxyNoMatch(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -146,7 +137,6 @@ func TestProxyNoMatch(t *testing.T) {
 	}
 }
 
-// TestProxyUnhealthyUpstream tests 502 when upstream is unhealthy.
 func TestProxyUnhealthyUpstream(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -165,7 +155,6 @@ func TestProxyUnhealthyUpstream(t *testing.T) {
 		},
 	})
 
-	// Wait for health check to determine unhealthy
 	time.Sleep(200 * time.Millisecond)
 
 	req := httptest.NewRequest("GET", "/api/test", nil)
@@ -178,7 +167,6 @@ func TestProxyUnhealthyUpstream(t *testing.T) {
 	}
 }
 
-// TestAddRequestHeaders tests request header addition.
 func TestAddRequestHeaders(t *testing.T) {
 	var capturedHeaders http.Header
 	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -218,7 +206,6 @@ func TestAddRequestHeaders(t *testing.T) {
 	}
 }
 
-// TestAddResponseHeaders tests response header addition.
 func TestAddResponseHeaders(t *testing.T) {
 	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Original", "original")
@@ -253,7 +240,6 @@ func TestAddResponseHeaders(t *testing.T) {
 	}
 }
 
-// TestListRoutes tests the management API for listing routes.
 func TestListRoutes(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -290,7 +276,6 @@ func TestListRoutes(t *testing.T) {
 	}
 }
 
-// TestAddRouteAPI tests the management API for adding routes.
 func TestAddRouteAPI(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -316,14 +301,12 @@ func TestAddRouteAPI(t *testing.T) {
 		t.Fatalf("expected status 201, got %d", w.Code)
 	}
 
-	// Verify route was added
 	routes := r.GetRoutes()
 	if len(routes) != 1 {
 		t.Fatalf("expected 1 route, got %d", len(routes))
 	}
 }
 
-// TestRemoveRouteAPI tests the management API for removing routes.
 func TestRemoveRouteAPI(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -338,7 +321,6 @@ func TestRemoveRouteAPI(t *testing.T) {
 		Upstream: "http://localhost:3000",
 	})
 
-	// For testing, we'll just check removal works
 	h.router.RemoveRoute(0)
 	routes := h.router.GetRoutes()
 	if len(routes) != 0 {
@@ -346,7 +328,6 @@ func TestRemoveRouteAPI(t *testing.T) {
 	}
 }
 
-// TestHealthEndpoint tests the health check endpoint.
 func TestHealthEndpoint(t *testing.T) {
 	hc := health.NewHealthChecker()
 	defer hc.Close()
@@ -370,7 +351,6 @@ func TestHealthEndpoint(t *testing.T) {
 		},
 	})
 
-	// Wait for health check
 	time.Sleep(150 * time.Millisecond)
 
 	req := httptest.NewRequest("GET", "/_proxy/health", nil)
@@ -390,7 +370,6 @@ func TestHealthEndpoint(t *testing.T) {
 	}
 }
 
-// TestProxyContentPassthrough tests that request/response bodies are passed through.
 func TestProxyContentPassthrough(t *testing.T) {
 	testPayload := []byte(`{"test": "data"}`)
 	var capturedPayload []byte
@@ -432,7 +411,6 @@ func TestProxyContentPassthrough(t *testing.T) {
 	}
 }
 
-// TestProxyRouteOrdering tests that routes are matched in order.
 func TestProxyRouteOrdering(t *testing.T) {
 	callCount := 0
 
@@ -456,7 +434,6 @@ func TestProxyRouteOrdering(t *testing.T) {
 	r := router.NewRouter(hc)
 	h := NewHandler(r, hc)
 
-	// Add two routes with same prefix, first should match
 	r.AddRoute(config.RouteConfig{
 		Match: config.MatchConfig{
 			PathPrefix: "/api",
@@ -481,7 +458,6 @@ func TestProxyRouteOrdering(t *testing.T) {
 	}
 }
 
-// TestRemoveRequestHeaders tests request header removal.
 func TestRemoveRequestHeaders(t *testing.T) {
 	var capturedHeaders http.Header
 	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -500,7 +476,7 @@ func TestRemoveRequestHeaders(t *testing.T) {
 		Match: config.MatchConfig{
 			PathPrefix: "/api",
 		},
-		Upstream:            upstreamServer.URL,
+		Upstream:             upstreamServer.URL,
 		RemoveRequestHeaders: []string{"Authorization", "X-Secret"},
 	})
 
@@ -523,7 +499,6 @@ func TestRemoveRequestHeaders(t *testing.T) {
 	}
 }
 
-// TestRemoveResponseHeaders tests response header removal.
 func TestRemoveResponseHeaders(t *testing.T) {
 	upstreamServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Server-Version", "1.0")
@@ -543,7 +518,7 @@ func TestRemoveResponseHeaders(t *testing.T) {
 		Match: config.MatchConfig{
 			PathPrefix: "/",
 		},
-		Upstream:             upstreamServer.URL,
+		Upstream:              upstreamServer.URL,
 		RemoveResponseHeaders: []string{"X-Server-Version", "X-Internal"},
 	})
 

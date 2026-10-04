@@ -12,11 +12,6 @@ interface Watch {
   abort: AbortController | null;
 }
 
-/**
- * One poller per upstream. Routes that share an upstream share the probe;
- * the poller stops when the last referencing route is removed.
- * Missing registration means healthy — only configured checks can fail a route.
- */
 export class HealthChecker {
   private readonly watches = new Map<string, Watch>();
   private closed = false;
@@ -55,7 +50,6 @@ export class HealthChecker {
     return this.watches.get(upstream)?.healthy ?? true;
   }
 
-  /** Upstreams that currently have a poller. */
   snapshot(): Record<string, boolean> {
     const status: Record<string, boolean> = {};
     for (const [upstream, watch] of this.watches) {
